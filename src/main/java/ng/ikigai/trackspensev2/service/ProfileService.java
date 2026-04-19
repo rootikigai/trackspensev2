@@ -6,6 +6,7 @@ import ng.ikigai.trackspensev2.dto.ProfileDTO;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
 import ng.ikigai.trackspensev2.repository.ProfileRepository;
 import ng.ikigai.trackspensev2.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,12 +28,15 @@ public class ProfileService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Value("${app.activation.url}")
+    private String activationURL;
+
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
         ProfileEntity newProfile = toEntity(profileDTO);
         newProfile.setActivationToken(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
         //send activation email
-        String activationLink = "http://localhost:8080/api/v2/activate?token=" + newProfile.getActivationToken();
+        String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
         String subject = "Activate your TrackSpense account";
         String body = "Click on the link to activate your account: " + activationLink;
         emailService.sendEmail(newProfile.getEmail(), subject, body);
