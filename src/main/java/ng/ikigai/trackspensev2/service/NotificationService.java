@@ -24,7 +24,7 @@ public class NotificationService {
     @Value("${trackspense.frontend.url}")
     private String frontendUrl;
 
-//    @Scheduled(cron = "0 * * * * *", zone = "Africa/Lagos")
+//    @Scheduled(cron = "0 * * * * *", zone = "Africa/Lagos") for testing!
     @Scheduled(cron = "0 0 22 * * *", zone = "Africa/Lagos")
     public void sendDailyIncomeExpenseReminder() {
         log.info("Job started: sendDailyIncomeExpenseReminder()");
@@ -38,7 +38,7 @@ public class NotificationService {
         }
         log.info("Job completed: sendDailyIncomeExpenseReminder()");
     }
-//    @Scheduled(cron = "0 * * * * *", zone = "Africa/Lagos")
+//    @Scheduled(cron = "0 * * * * *", zone = "Africa/Lagos") for testing too!
     @Scheduled(cron = "0 0 23 * * *", zone = "Africa/Lagos")
     public void sendDailyExpenseSummary(){
         log.info("Job started: sendDailyExpenseSummary()");
