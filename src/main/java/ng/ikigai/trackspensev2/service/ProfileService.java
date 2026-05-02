@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ng.ikigai.trackspensev2.dto.AuthDTO;
 import ng.ikigai.trackspensev2.dto.ProfileDTO;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
+import ng.ikigai.trackspensev2.exception.EmailAlreadyExistsException;
 import ng.ikigai.trackspensev2.repository.ProfileRepository;
 import ng.ikigai.trackspensev2.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,15 +33,23 @@ public class ProfileService {
     @Value("${app.activation.url}")
     private String activationURL;
 
+    @Transactional
     public ProfileDTO registerProfile(ProfileDTO profileDTO){
+        // Check if email already exists
+        if (profileRepository.findByEmail(profileDTO.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("An account with this email already exists.");
+        }
+
         ProfileEntity newProfile = toEntity(profileDTO);
         newProfile.setActivationToken(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
+
         //send activation email
         String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
         String subject = "Activate your TrackSpense account";
         String body = "Click on the link to activate your account: " + activationLink;
         emailService.sendEmail(newProfile.getEmail(), subject, body);
+
         return toDTO(newProfile);
     }
 

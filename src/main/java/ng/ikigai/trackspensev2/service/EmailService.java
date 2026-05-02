@@ -1,6 +1,7 @@
 package ng.ikigai.trackspensev2.service;
 
 import lombok.RequiredArgsConstructor;
+import ng.ikigai.trackspensev2.exception.EmailSendingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -40,7 +41,7 @@ public class EmailService {
             mailSender.send(messagePreparator);
         }
         catch (MailException e){
-            throw new RuntimeException("Failed to send email to " + to + ": " + e.getMessage(), e);
+            throw new EmailSendingException("Failed to send activation email to " + to + ". Please check your email address and try again.", e);
         }
     }
 }
