@@ -1,6 +1,8 @@
 package ng.ikigai.trackspensev2.service;
 
 import ng.ikigai.trackspensev2.exception.EmailSendingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +15,7 @@ import java.util.Map;
 
 @Service
 public class EmailService {
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
     private String apikey;
     private String senderEmail;
     private String senderName;
@@ -46,6 +49,7 @@ public class EmailService {
             restTemplate.postForEntity("https://api.brevo.com/v3/smtp/email", request, String.class);
 
         } catch (Exception e){
+            log.error("Failed to send activation email to {}: {}", to, e.getMessage(), e);
             throw new EmailSendingException("Failed to send activation email to " + to + ". Please check your email address and try again.", e);
         }
     }
