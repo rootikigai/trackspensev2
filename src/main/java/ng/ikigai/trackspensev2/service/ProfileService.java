@@ -44,8 +44,12 @@ public class ProfileService {
         newProfile.setActivationToken(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
 
-        String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
-        emailService.sendEmail(newProfile.getEmail(), "Activate your account", "Link: " + activationLink);
+        try {
+            String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
+            emailService.sendEmail(newProfile.getEmail(), "Activate your account", "Link: " + activationLink);
+        } catch (Exception e) {
+            System.err.println("Email failed to send for user: " + newProfile.getEmail() + " - Reason: " + e.getMessage());
+        }
 
         return toDTO(newProfile);
     }
