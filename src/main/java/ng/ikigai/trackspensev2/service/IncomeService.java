@@ -8,6 +8,8 @@ import ng.ikigai.trackspensev2.entity.CategoryEntity;
 import ng.ikigai.trackspensev2.entity.ExpenseEntity;
 import ng.ikigai.trackspensev2.entity.IncomeEntity;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
+import ng.ikigai.trackspensev2.exception.AccessDeniedException;
+import ng.ikigai.trackspensev2.exception.ResourceNotFoundException;
 import ng.ikigai.trackspensev2.repository.CategoryRepository;
 import ng.ikigai.trackspensev2.repository.IncomeRepository;
 import org.springframework.data.domain.Sort;
@@ -28,8 +30,8 @@ public class IncomeService {
     //Adds new Income to database
     public IncomeDTO addIncome(IncomeDTO dto){
         ProfileEntity profile = profileService.getCurrentProfile();
-        CategoryEntity category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        CategoryEntity category = categoryRepository.findByIdAndProfileId(dto.getCategoryId(), profile.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to you!"));
         IncomeEntity newIncome = toEntity(dto, profile, category);
         newIncome = incomeRepository.save(newIncome);
         return toDTO(newIncome);
@@ -49,9 +51,9 @@ public class IncomeService {
     public void deleteIncome(Long incomeId) {
         ProfileEntity profile = profileService.getCurrentProfile();
         IncomeEntity entity = incomeRepository.findById(incomeId)
-                .orElseThrow(() -> new RuntimeException("Income not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Income not found"));
         if (!entity.getProfile().getId().equals(profile.getId())) {
-            throw new RuntimeException("Unauthorized to delete this income");
+            throw new AccessDeniedException("You do not have permission to delete this income");
         }
         incomeRepository.delete(entity);
     }

@@ -5,6 +5,8 @@ import ng.ikigai.trackspensev2.dto.ExpenseDTO;
 import ng.ikigai.trackspensev2.entity.CategoryEntity;
 import ng.ikigai.trackspensev2.entity.ExpenseEntity;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
+import ng.ikigai.trackspensev2.exception.AccessDeniedException;
+import ng.ikigai.trackspensev2.exception.ResourceNotFoundException;
 import ng.ikigai.trackspensev2.repository.CategoryRepository;
 import ng.ikigai.trackspensev2.repository.ExpenseRepository;
 import org.springframework.data.domain.Sort;
@@ -25,8 +27,8 @@ public class ExpenseService {
     //Adds new expense to database
     public ExpenseDTO addExpense(ExpenseDTO dto){
         ProfileEntity profile = profileService.getCurrentProfile();
-        CategoryEntity category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        CategoryEntity category = categoryRepository.findByIdAndProfileId(dto.getCategoryId(), profile.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found or does not belong to you!"));
         ExpenseEntity newExpense = toEntity(dto, profile, category);
         newExpense = expenseRepository.save(newExpense);
         return toDTO(newExpense);
@@ -46,9 +48,9 @@ public class ExpenseService {
     public void deleteExpense(Long expenseId){
         ProfileEntity profile = profileService.getCurrentProfile();
         ExpenseEntity entity = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
         if(!entity.getProfile().getId().equals(profile.getId())){
-            throw new RuntimeException("Unauthorized to delete this expense");
+            throw new AccessDeniedException("You do not have permission to delete this expense");
         }
         expenseRepository.delete(entity);
     }

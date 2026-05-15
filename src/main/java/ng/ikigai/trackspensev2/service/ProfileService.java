@@ -5,7 +5,6 @@ import ng.ikigai.trackspensev2.dto.AuthDTO;
 import ng.ikigai.trackspensev2.dto.ProfileDTO;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
 import ng.ikigai.trackspensev2.exception.EmailAlreadyExistsException;
-import ng.ikigai.trackspensev2.exception.EmailSendingException;
 import ng.ikigai.trackspensev2.repository.ProfileRepository;
 import ng.ikigai.trackspensev2.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,18 +44,9 @@ public class ProfileService {
         newProfile.setActivationToken(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
 
-        try {
-            //send activation email
-            String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
-            String subject = "Activate your TrackSpense account";
-            String body = "Click on the link to activate your account: " + activationLink;
-            emailService.sendEmail(newProfile.getEmail(), subject, body);
+        String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
+        emailService.sendEmail(newProfile.getEmail(), "Activate your account", "Link: " + activationLink);
 
-        } catch (Exception e) {
-            // Email failed: delete the user to prevent orphaned records
-            profileRepository.delete(newProfile);
-            throw new EmailSendingException("Failed to send activation email. Please try again.", e);
-        }
         return toDTO(newProfile);
     }
 

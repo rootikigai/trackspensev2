@@ -6,6 +6,8 @@ import ng.ikigai.trackspensev2.dto.ExpenseDTO;
 import ng.ikigai.trackspensev2.entity.ProfileEntity;
 import ng.ikigai.trackspensev2.repository.ProfileRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +30,20 @@ public class NotificationService {
     @Scheduled(cron = "0 0 22 * * *", zone = "Africa/Lagos")
     public void sendDailyIncomeExpenseReminder() {
         log.info("Job started: sendDailyIncomeExpenseReminder()");
-        List<ProfileEntity> profiles = profileRepository.findAll();
-        for (ProfileEntity profile : profiles) {
-            String body = "Hi " + profile.getFullName() + ",<br><br>"
-                    + "This is a friendly reminder to add your income and expenses for today in TrackSpense.<br><br>"
-                    + "<a href=" + frontendUrl + " style='display:inline-block;padding:10px 20px;background-color:#4CAF50;color:#fff;text-decoration:none;border-radius:5px;font-weight:bold;'>Go to TrackSpense</a>"
-                    + "<br><br>Best regards,<br>Mr. Ikigai,<br>for the TrackSpense Team.";
-            emailService.sendEmail(profile.getEmail(), "Daily Reminder: Add your income and expenses", body);
-        }
+        int page = 0;
+        Page<ProfileEntity> profilePage;
+//        List<ProfileEntity> profiles = profileRepository.findAll();
+        do {
+            profilePage = profileRepository.findAll(PageRequest.of(page, 50));
+            for (ProfileEntity profile : profilePage) {
+                String body = "Hi " + profile.getFullName() + ",<br><br>"
+                        + "This is a friendly reminder to add your income and expenses for today in TrackSpense.<br><br>"
+                        + "<a href=" + frontendUrl + " style='display:inline-block;padding:10px 20px;background-color:#4CAF50;color:#fff;text-decoration:none;border-radius:5px;font-weight:bold;'>Go to TrackSpense</a>"
+                        + "<br><br>Best regards,<br>Mr. Ikigai,<br>for the TrackSpense Team.";
+                emailService.sendEmail(profile.getEmail(), "Daily Reminder: Add your income and expenses", body);
+            }
+            page++;
+        } while (profilePage.hasNext());
         log.info("Job completed: sendDailyIncomeExpenseReminder()");
     }
 //    @Scheduled(cron = "0 * * * * *", zone = "Africa/Lagos") for testing too!

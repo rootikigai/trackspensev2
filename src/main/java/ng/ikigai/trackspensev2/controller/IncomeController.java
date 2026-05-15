@@ -1,5 +1,6 @@
 package ng.ikigai.trackspensev2.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ng.ikigai.trackspensev2.dto.IncomeDTO;
 import ng.ikigai.trackspensev2.service.IncomeService;
@@ -17,7 +18,7 @@ public class IncomeController {
     private final IncomeService incomeService;
 
     @PostMapping
-    public ResponseEntity<IncomeDTO> addIncome(@RequestBody IncomeDTO dto){
+    public ResponseEntity<IncomeDTO> addIncome(@Valid @RequestBody IncomeDTO dto){
         IncomeDTO saved = incomeService.addIncome(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }

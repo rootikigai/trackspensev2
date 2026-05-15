@@ -1,5 +1,8 @@
 package ng.ikigai.trackspensev2.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +19,18 @@ import java.time.LocalDateTime;
 public class IncomeDTO {
 
     private Long id;
+
+    @NotBlank(message = "Name is required")
     private String name;
+
     private String icon;
     private String categoryName;
     private Long categoryId;
+
+    @NotNull(message = "Amount is required")
+    @Positive(message = "Amount must be a positive")
     private BigDecimal amount;
+
     private LocalDate date;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
