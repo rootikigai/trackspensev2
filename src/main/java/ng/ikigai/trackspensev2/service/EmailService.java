@@ -17,12 +17,15 @@ public class EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
     private final JavaMailSender mailSender;
+    private final org.thymeleaf.TemplateEngine templateEngine;
 
-    @Value("${spring.mail.username}")
+//    @Value("${spring.mail.username}")
+    @Value("${mail.from.address:noreply@trackspense.local}")
     private String fromEmail;
 
     public void sendEmail(String to, String subject, String body) {
         try {
+            //            3. Send Email
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             helper.setFrom(fromEmail);
@@ -31,6 +34,22 @@ public class EmailService {
             helper.setText(body, true);
             mailSender.send(mimeMessage);
         } catch (Exception e) {
+            log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
+            throw new EmailSendingException("Failed to send activation email to " + to + ". Please check your email address and try again.", e);
+        }
+    }
+
+    public void sendActivationEmail(String to, String name, String activationUrl) {
+        try {
+//            1. Prepare Thymeleaf Context
+            org.thymeleaf.context.Context context = new org.thymeleaf.context.Context();
+            context.setVariable("name", name);
+            context.setVariable("activationUrl", activationUrl);
+
+//            2. Process Template
+            String htmlContent = templateEngine.process("activation-email", context);
+            sendEmail(to, "Activate your account", htmlContent);
+        }catch (Exception e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
             throw new EmailSendingException("Failed to send activation email to " + to + ". Please check your email address and try again.", e);
         }

@@ -46,7 +46,7 @@ public class ProfileService {
 
         try {
             String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
-            emailService.sendEmail(newProfile.getEmail(), "Activate your account", "Link: " + activationLink);
+            emailService.sendActivationEmail(newProfile.getEmail(), newProfile.getFullName(), activationLink);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
