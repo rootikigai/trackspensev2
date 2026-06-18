@@ -34,12 +34,15 @@ public class ProfileController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO authDTO){
+    public ResponseEntity<Map<String, Object>> login(@RequestBody AuthDTO authDTO) {
+//        TODO: Re-enable this check when email activation is required again
+        /*
         if(!profileService.isAccountActive(authDTO.getEmail())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
                     "message", "Account is not active. Kindly check your email and activate your account first!"
             ));
         }
+        */
         Map<String, Object> response = profileService.authenticateAndGenerateToken(authDTO);
         return ResponseEntity.ok(response);
     }
