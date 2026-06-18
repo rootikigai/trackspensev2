@@ -37,7 +37,8 @@ public class ProfileEntity {
     @PrePersist
     public void prePersist(){
         if(this.isActive == null){
-            isActive = false;
+            // TODO: Revert to false when I restore email activation
+            isActive = true;
         }
     }
 }
