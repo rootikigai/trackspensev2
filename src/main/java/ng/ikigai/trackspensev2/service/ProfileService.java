@@ -44,12 +44,15 @@ public class ProfileService {
         newProfile.setActivationToken(UUID.randomUUID().toString());
         newProfile = profileRepository.save(newProfile);
 
+//        TODO: Uncomment this lock to enable email activation later
+        /*
         try {
             String activationLink = activationURL + "/api/v2/activate?token=" + newProfile.getActivationToken();
             emailService.sendActivationEmail(newProfile.getEmail(), newProfile.getFullName(), activationLink);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+        */
 
         return toDTO(newProfile);
     }
